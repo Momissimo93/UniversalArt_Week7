@@ -5,6 +5,7 @@ using UnityEngine;
 public class Hero : Character
 {
     [SerializeField] int jumpForce;
+    [SerializeField] List<Guns> guns = new List<Guns>();
     //[SerializeField] GameObject bullet;
     //[SerializeField] Transform firePoint;
 
@@ -65,7 +66,7 @@ public class Hero : Character
 
     void checkIfButtonDownPressed()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Fire1") && HasWeapon())
         {
             animator.SetTrigger("fire");
             isFiring = true;
@@ -101,9 +102,39 @@ public class Hero : Character
             }
         }
     }
-
-    void Shoot(GameObject b, Transform spwaningBulletPosition)
+    private void Shoot(GameObject b, Transform spwaningBulletPosition)
     {
         GameObject bullet = Instantiate(b, spwaningBulletPosition.position, spwaningBulletPosition.rotation);
+       
+    }
+
+    private bool HasWeapon()
+    {
+        if (guns.Count != 0)
+        {
+            Debug.Log("We have a weapon");
+            return true;
+        }
+        return false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D c)
+    {
+        if (c.gameObject.CompareTag("Weapon"))
+        {
+            Guns g = c.gameObject.GetComponent<Revolver>().getGun();
+            guns.Add(g);
+            ShowGuns();
+            Destroy(c.gameObject);
+        }
+    }
+
+    private void ShowGuns()
+    {
+        Debug.Log("This are the gun that we have collected");
+        for (int i = 0; i < guns.Count; i++)
+        {
+            Debug.Log(guns[i].gunType);
+        }
     }
 }
