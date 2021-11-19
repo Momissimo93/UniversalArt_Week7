@@ -14,6 +14,7 @@ public class FlyingEyeBullet : MonoBehaviour
     Rigidbody2D rb;
     Hero target;
     Vector2 moveDirection;
+  
 
     private void Start()
     {
@@ -35,7 +36,6 @@ public class FlyingEyeBullet : MonoBehaviour
          {
              DestroyProjectile();
          }*/
-       
     }
     void OnTriggerEnter2D(Collider2D hitInfo)
     {

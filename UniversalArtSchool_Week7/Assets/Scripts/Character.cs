@@ -38,6 +38,7 @@ public class Character : MonoBehaviour
     protected bool facingForward;
     protected bool goingtBackToInitialPos;
     protected bool directionChange = false;
+    protected bool immune = false;
 
     private float rangeRadius;
     private Vector3 rangeOrigin;
@@ -50,6 +51,8 @@ public class Character : MonoBehaviour
     private int enemyLayer = 1 << 7;
     private int bulletLayer = 1 << 8;
     private int heroLayer = 1 << 9;
+
+    float counter;
 
     //The current life points 
     private protected int lifePoints;
@@ -214,16 +217,75 @@ public class Character : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
-        Debug.Log("LifePoints = " + lifePoints);
-
-        //The lifePoints dimisnishes according to the damage taken and the healthbar is updated
-        lifePoints -= damage;
-        healthBar.SetHealth(lifePoints);
-
-        //We check if we still have life
-        if (lifePoints <= 0)
+        if(!immune)
         {
-            Destroy(gameObject);
+            //The lifePoints dimisnishes according to the damage taken and the healthbar is updated
+            lifePoints -= damage;
+            healthBar.SetHealth(lifePoints);
+
+            //We check if we still have life
+            if (lifePoints <= 0)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                StartCoroutine("Immunity", 2f);
+            }
+        }
+        
+    }
+    IEnumerator Immunity(float seconds)
+    {
+        immune = true;
+
+        for (int i = 0; i < 3; i++)
+        {
+            //Fa 3 giri ma fermandosi per 1 secondo 
+            yield return new WaitForSeconds(1f);
+        }
+        RestoreRightAlpha();
+        immune = false;
+
+        //Debug.Log("I am not immune");
+    }    
+    protected void Blinking()
+    { 
+        if (gameObject.GetComponent<SpriteRenderer>())
+        {
+            SpriteRenderer spriteRenderer;
+            spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+            Color tempColor = spriteRenderer.color;
+
+            if (spriteRenderer.color.a == 0)
+            {
+                tempColor.a = 1f;
+                spriteRenderer.color = tempColor;
+            }
+
+            else if (spriteRenderer.color.a == 1)
+            {
+                tempColor.a = 0f;
+                spriteRenderer.color = tempColor;
+            }
+        }
+    }
+    public void RestoreRightAlpha()
+    {
+        if (gameObject.GetComponent<SpriteRenderer>())
+        {
+            SpriteRenderer spriteRenderer;
+            spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+            Color tempColor = spriteRenderer.color;
+
+            if (spriteRenderer.color.a == 0)
+            {
+                tempColor.a = 1f;
+                spriteRenderer.color = tempColor;
+                Debug.Log("Alpha Restored");
+            }
+            else
+                Debug.Log("There is no need for restoring Alpha Restored");
         }
     }
     void Die()

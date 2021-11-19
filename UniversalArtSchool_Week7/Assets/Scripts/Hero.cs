@@ -39,6 +39,10 @@ public class Hero : Character
     private void FixedUpdate()
     {
         checkIfButtonPressed();
+        if (immune)
+        {
+            Blinking();
+        }
     }
 
     void checkIfButtonPressed()

@@ -39,6 +39,9 @@ public class Enemy : Character
 
     private void FixedUpdate()
     {
-
+        if (immune)
+        {
+            Blinking();
+        }
     }
 }
