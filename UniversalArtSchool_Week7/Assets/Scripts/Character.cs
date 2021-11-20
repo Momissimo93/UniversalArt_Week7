@@ -219,6 +219,8 @@ public class Character : MonoBehaviour
     {
         if(!immune)
         {
+            Debug.Log("lifePoints =" + lifePoints);
+            Debug.Log("Damage =" + damage);
             //The lifePoints dimisnishes according to the damage taken and the healthbar is updated
             lifePoints -= damage;
             healthBar.SetHealth(lifePoints);

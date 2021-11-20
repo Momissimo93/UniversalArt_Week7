@@ -5,12 +5,20 @@ using UnityEngine;
 public class Hero : Character
 {
     [SerializeField] int jumpForce;
+
+    //This List was created for sstruct exercise 
     [SerializeField] List<Guns> guns = new List<Guns>();
-    //[SerializeField] GameObject bullet;
-    //[SerializeField] Transform firePoint;
+
+    //This Dictionary was created for the Dictionary exercise 
+    [SerializeField] Dictionary<string,Reliques> invenotory = new Dictionary<string,Reliques>();
 
     private bool isFiring;
+    private bool hasWhip = false;
     private float speedLocalReference;
+
+    Guns gunSelected;
+    int inventoryIndex = -1;
+
 
     private void Awake()
     {
@@ -30,23 +38,20 @@ public class Hero : Character
         healthBar.SetMaxHealth(maxLifePoints);
         healthBar.SetHealth(maxLifePoints);
     }
-
     void Update()
     {
-        checkIfButtonDownPressed();
+        CheckIfButtonDownPressed();
         EmittingRaysFromFeet();
     }
-
     private void FixedUpdate()
     {
-        checkIfButtonPressed();
+        CheckIfButtonPressed();
         if (immune)
         {
             Blinking();
         }
     }
-
-    void checkIfButtonPressed()
+    private void CheckIfButtonPressed()
     {
         if (Input.GetButton("Horizontal") && (!isFiring))
         {
@@ -63,13 +68,15 @@ public class Hero : Character
             StopMoving();
         }
     }
-
-    void checkIfButtonDownPressed()
+    private void CheckIfButtonDownPressed()
     {
         if (Input.GetButtonDown("Fire1") && HasWeapon())
         {
             animator.SetTrigger("fire");
             isFiring = true;
+
+            SetBulletType(bullet);
+
             Shoot(bullet, firePoint);
         }
         else if (Input.GetButtonUp("Fire1"))
@@ -77,13 +84,82 @@ public class Hero : Character
             isFiring = false;
         }
 
-        if (Input.GetButtonDown("Jump") && isOnGround)
+        else if (Input.GetButtonDown("Jump") && isOnGround)
         {
             animator.SetTrigger("jump");
             Jump(jumpForce);
         }
+
+        else if (Input.GetKeyDown("r"))
+        {
+            if (HasWeapon())
+            {
+                if (inventoryIndex > guns.Count - 1)
+                {
+                    inventoryIndex = 0;
+                }
+                gunSelected = guns[inventoryIndex];
+                inventoryIndex++;
+
+                Debug.Log("The Gun that we have selected is " + gunSelected.gunName);
+            }
+            else
+                Debug.Log("I do not have any weapon yet");
+        }
+        else if (Input.GetKeyDown("f"))
+        {
+            if (hasWhip)
+            {
+                animator.SetTrigger("whip");
+            }
+            else
+                Debug.Log("I do not have the weap yet");
+        }
     }
-    void SetHeroRotation()
+    private void Shoot(GameObject b, Transform spwaningBulletPosition)
+    {
+        GameObject bullet = Instantiate(b, spwaningBulletPosition.position, spwaningBulletPosition.rotation);
+    }
+    private bool HasWeapon()
+    {
+        if (guns.Count != 0)
+        {
+            Debug.Log("We have a weapon");
+            return true;
+        }
+        return false;
+    }
+    private void OnCollisionEnter2D(Collision2D c)
+    {
+        if (c.gameObject.GetComponent<Guns_Manager>())
+        {
+            Guns g = c.gameObject.GetComponent<Guns_Manager>().getGun();
+
+            //If this is the first gun that we collect we set it as the equiped weapon 
+            if (inventoryIndex == -1)
+            {
+                guns.Add(g);
+                inventoryIndex = 0;
+                gunSelected = guns[inventoryIndex];
+            }
+            else
+            {
+                guns.Add(g);
+            }
+            ShowGuns();
+            Destroy(c.gameObject);
+        }
+
+        if (c.gameObject.GetComponent<Item_Manager>())
+        {
+            Reliques r = c.gameObject.GetComponent<Item_Manager>().getRelique();
+            invenotory.Add(r.reliqueName, r);
+            GetPowerUp(r);
+            ShowInventoryItems();
+            Destroy(c.gameObject);
+        }
+    }
+    private void SetHeroRotation()
     {
         if (Input.GetKey("a") || Input.GetKey("left"))
         {
@@ -102,39 +178,39 @@ public class Hero : Character
             }
         }
     }
-    private void Shoot(GameObject b, Transform spwaningBulletPosition)
+    private void SetBulletType(GameObject b)
     {
-        GameObject bullet = Instantiate(b, spwaningBulletPosition.position, spwaningBulletPosition.rotation);
-       
-    }
-
-    private bool HasWeapon()
-    {
-        if (guns.Count != 0)
+        if (b.gameObject.GetComponent<ArcheoBullet>())
         {
-            Debug.Log("We have a weapon");
-            return true;
-        }
-        return false;
-    }
-
-    private void OnCollisionEnter2D(Collision2D c)
-    {
-        if (c.gameObject.CompareTag("Weapon"))
-        {
-            Guns g = c.gameObject.GetComponent<Revolver>().getGun();
-            guns.Add(g);
-            ShowGuns();
-            Destroy(c.gameObject);
+            b.gameObject.GetComponent<ArcheoBullet>().SetBulletAttributs(gunSelected);
         }
     }
 
+    private void GetPowerUp (Reliques r)
+    {
+        if(r.GetPowerUpType() == "JumpingPower")
+        {
+            jumpForce += r.powerAttribute;
+        }
+        else if(r.GetPowerUpType() == "Whip")
+        {
+            hasWhip = true;
+        }
+    }
     private void ShowGuns()
     {
         Debug.Log("This are the gun that we have collected");
         for (int i = 0; i < guns.Count; i++)
         {
-            Debug.Log(guns[i].gunType);
+            Debug.Log(guns[i].gunName);
+        }
+    }
+    private void ShowInventoryItems()
+    {
+        Debug.Log("The element stored in the item are: ");
+        foreach (KeyValuePair<string, Reliques> kvp in invenotory)
+        {
+            Debug.Log("The name of the item is: " + kvp.Key + ". And it is of type : "+ kvp.Value);
         }
     }
 }

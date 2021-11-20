@@ -6,7 +6,10 @@ public class ArcheoBullet : MonoBehaviour
 {
     [SerializeField] float speed = 20f;
     Rigidbody2D rb;
-    int damage = 1;
+
+    //I had to make this variable public in order to work 
+    public int damage = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -22,9 +25,15 @@ public class ArcheoBullet : MonoBehaviour
         Character character = hitInfo.GetComponent<Character>();
         if (character != null && character.name != "Hero")
         {
-            character.TakeDamage(1);
+            Debug.Log("The enemy will get " + damage);
+            character.TakeDamage(damage);
             Destroy(this.gameObject);
         }
     }
 
+    public void SetBulletAttributs(Guns g)
+    {
+        damage = g.additionalDamages;
+        Debug.Log("Set bullet Damage: " + damage);
+    }
 }

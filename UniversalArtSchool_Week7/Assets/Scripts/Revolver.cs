@@ -10,7 +10,7 @@ public class Revolver : MonoBehaviour
 
     void Start()
     {
-        revolver.gunType = gameObject.name;
+        
     }
 
     // Update is called once per frame
