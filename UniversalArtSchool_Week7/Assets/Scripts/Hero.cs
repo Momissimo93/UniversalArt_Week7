@@ -19,7 +19,6 @@ public class Hero : Character
     Guns gunSelected;
     int inventoryIndex = -1;
 
-
     private void Awake()
     {
         GetAnimator();
@@ -28,7 +27,7 @@ public class Hero : Character
     void Start()
     {
         facingForward = true;
-        speedLocalReference = speed;
+        //speedLocalReference = speed;
 
         //maxLifePoints can be set and can be see in the inspector
         //Initially the player lifePoints will be equal to that of the maxLifePoints
@@ -37,15 +36,23 @@ public class Hero : Character
         lifePoints = maxLifePoints;
         healthBar.SetMaxHealth(maxLifePoints);
         healthBar.SetHealth(maxLifePoints);
+
+        if(gameObject.GetComponent<Rigidbody2D>())
+        {
+            rb = gameObject.GetComponent<Rigidbody2D>();
+        }
     }
     void Update()
     {
         CheckIfButtonDownPressed();
         EmittingRaysFromFeet();
+        //EmittingRayFromHead();
     }
     private void FixedUpdate()
     {
+
         CheckIfButtonPressed();
+    
         if (immune)
         {
             Blinking();
@@ -53,20 +60,69 @@ public class Hero : Character
     }
     private void CheckIfButtonPressed()
     {
-        if (Input.GetButton("Horizontal") && (!isFiring))
-        {
-            speed = speedLocalReference;
-            SetHeroRotation();
-            direction = Input.GetAxis("Horizontal");
-            animator.SetFloat("speed", speed);
+        direction = Input.GetAxisRaw("Horizontal");
+        Debug.Log("direction: " + direction);
+        rb.velocity = new Vector2(speed * direction, rb.velocity.y);
 
-            Move();
+        RaycastHit2D rayFromHead = Physics2D.Raycast(transform.position, Vector2.up, 0.4f, ladder);
+
+        if (rayFromHead)
+        {
+            //Debug.Log("A ladder");
+            //Debug.Log("The name is " + rayFromHead.collider.gameObject.name);
+
+            if (rayFromHead.collider != null)
+            {
+                if (Input.GetKeyDown(KeyCode.W))
+                {
+                    //Debug.Log("I am climbing");
+                    isClimbing = true;
+                }
+            }
+        }
+        if (isClimbing == true && rayFromHead.collider != null)
+        {
+            Debug.Log("Let's Climb" + direction);
+            vertical = Input.GetAxisRaw("Vertical");
+            rb.gravityScale = 0;
+            rb.velocity = new Vector2(rb.velocity.x, vertical * speed);
         }
         else
         {
-            animator.SetFloat("speed", 0);
-            StopMoving();
+            rb.gravityScale = 5;
         }
+   
+
+        /*if ((Input.GetButton("Horizontal")  && (!isFiring)))
+        {
+            //speed = speedLocalReference;
+            SetHeroRotation();
+            direction = Input.GetAxisRaw("Horizontal");
+            animator.SetFloat("speed", speed);
+            Move();
+        }
+        else if ((Input.GetButton("Vertical")))
+        {
+            Debug.Log("Move Vertically");
+            //speed = speedLocalReference;
+            SetHeroRotation();
+            vertical = Input.GetAxis("Vertical");
+            Move();
+            //Climb();
+        }*/
+            /*else if (Input.GetButton("Vertical"))
+            {
+                speed = speedLocalReference;
+                direction = Input.GetAxis("Vertical");
+                animator.SetFloat("speed", speed);
+                Move();
+            }*/
+
+        /*else
+        {
+            animator.SetFloat("speed", 0);
+            //StopMoving();
+        }*/
     }
     private void CheckIfButtonDownPressed()
     {
@@ -185,7 +241,6 @@ public class Hero : Character
             b.gameObject.GetComponent<ArcheoBullet>().SetBulletAttributs(gunSelected);
         }
     }
-
     private void GetPowerUp (Reliques r)
     {
         if(r.GetPowerUpType() == "JumpingPower")

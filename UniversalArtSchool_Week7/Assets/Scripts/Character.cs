@@ -6,6 +6,7 @@ public class Character : MonoBehaviour
 {
     [SerializeField] protected float speed;
     [SerializeField] protected float direction;
+    [SerializeField] protected float vertical;
 
     //The max life points. They can be set in the inspector 
     [SerializeField] protected int maxLifePoints;
@@ -39,6 +40,7 @@ public class Character : MonoBehaviour
     protected bool goingtBackToInitialPos;
     protected bool directionChange = false;
     protected bool immune = false;
+    protected bool isClimbing = false;
 
     private float rangeRadius;
     private Vector3 rangeOrigin;
@@ -51,8 +53,12 @@ public class Character : MonoBehaviour
     private int enemyLayer = 1 << 7;
     private int bulletLayer = 1 << 8;
     private int heroLayer = 1 << 9;
+    //I need to use it in the Hero class
+    protected int ladder = 1 << 10;
 
     float counter;
+
+    //protected RaycastHit2D rayFromHead;
 
     //The current life points 
     private protected int lifePoints;
@@ -82,6 +88,15 @@ public class Character : MonoBehaviour
         CheckIfGround(leftFootRays, rightFootRays);
         DrawRaysFromFeet();
     }
+    protected void EmittingRayFromHead()
+    {
+        //rayFromHead = Physics2D.Raycast(transform.position, Vector2.up, 0.4f, ladder);
+
+
+        //Debug.Log(rayFromHead);
+        Debug.DrawRay(transform.position, Vector2.up * 0.4f, Color.blue);
+        //CheckIfLadder(rayFromHead);
+    }
     private void CheckIfGround(RaycastHit2D lFRays, RaycastHit2D rFRays)
     {
         if ((!lFRays) || (!rFRays))
@@ -100,6 +115,20 @@ public class Character : MonoBehaviour
         }
         else
             isOnGround = true;
+    }
+
+    private void CheckIfLadder (RaycastHit2D rayFromHead)
+    {
+        /*if (rayFromHead.collider != null)
+        {
+            canClimb = true;
+            Debug.Log("There is a ladder");
+        }
+        else
+        {
+            canClimb = false;
+            Debug.Log("Let's not climb");
+        }*/
     }
     protected void EmittingEyeSight()
     {
@@ -173,13 +202,37 @@ public class Character : MonoBehaviour
     }
     public void HeroMovement()
     {
-        Rigidbody2D rb;
+        Debug.Log("direction: " + direction);
+        rb.velocity = new Vector2(speed * direction, rb.velocity.y);
 
-        if (GetComponent<Rigidbody2D>())
+        RaycastHit2D rayFromHead = Physics2D.Raycast(transform.position, Vector2.up, 0.4f, ladder);
+
+        if (rayFromHead)
         {
-            rb = GetComponent<Rigidbody2D>();
-            rb.velocity = new Vector2(speed * direction, rb.velocity.y);
+            //Debug.Log("A ladder");
+            //Debug.Log("The name is " + rayFromHead.collider.gameObject.name);
+
+            if (rayFromHead.collider != null)
+            {
+                if (Input.GetKeyDown(KeyCode.W))
+                {
+                    //Debug.Log("I am climbing");
+                    isClimbing = true;
+                }
+            }
         }
+        if (isClimbing == true && rayFromHead.collider != null)
+        {
+            Debug.Log("Let's Climb" + direction);
+            vertical = Input.GetAxisRaw("Vertical");
+            rb.gravityScale = 0;
+            rb.velocity = new Vector2(rb.velocity.x, vertical * speed);
+        }
+        else
+        {
+            rb.gravityScale = 5;
+        }
+
     }
     public void Patrolling()
     {

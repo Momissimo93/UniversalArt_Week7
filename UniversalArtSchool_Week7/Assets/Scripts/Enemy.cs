@@ -9,7 +9,6 @@ public class Enemy : Character
         GetAnimator();
         GetBoxCollider();
     }
-
     private void Start()
     {
         facingForward = true;
