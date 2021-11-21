@@ -60,6 +60,58 @@ public class Hero : Character
     }
     private void CheckIfButtonPressed()
     {
+        RaycastHit2D rayFromHead = Physics2D.Raycast(transform.position, Vector2.up, 0.4f, ladder);
+        Debug.Log("IsClimbing " + isClimbing);
+        Debug.Log("RayFromHead.collider" + rayFromHead.collider);
+
+        if (Input.GetButton("Horizontal") && !isFiring)
+        {
+            direction = Input.GetAxisRaw("Horizontal");
+            rb.velocity = new Vector2(speed * direction, rb.velocity.y);
+            SetHeroRotation();
+            animator.SetFloat("speed", speed);
+            //isClimbing = false;
+        }
+        else
+        {
+            animator.SetFloat("speed", 0);
+        }
+
+        if (Input.GetButton("Vertical"))
+        {
+            if (rayFromHead.collider != null)
+            {
+                if (Input.GetButton("Vertical"))
+                {
+                    isClimbing = true;
+                }
+            }
+            else if(isOnGround)
+            {
+                isClimbing = false;
+            }
+        }
+        if (isClimbing == true && rayFromHead.collider != null)
+        {
+            verticalDirection = Input.GetAxisRaw("Vertical");
+            rb.gravityScale = 0;
+            rb.velocity = new Vector2(rb.velocity.x, verticalDirection * speed);
+            Debug.Log("I am Climbing");
+            Debug.Log("IsClimbing " + isClimbing);
+            Debug.Log("RayFromHead.collider" + rayFromHead.collider);
+        }
+        else 
+        {
+            rb.gravityScale = 5;
+            if(isOnGround)
+            {
+                isClimbing = false;
+            }
+        }
+
+        /*
+        Questo funziona 
+
         direction = Input.GetAxisRaw("Horizontal");
         Debug.Log("direction: " + direction);
         rb.velocity = new Vector2(speed * direction, rb.velocity.y);
@@ -79,6 +131,10 @@ public class Hero : Character
                     isClimbing = true;
                 }
             }
+            else
+            {
+                isClimbing = false;
+            }
         }
         if (isClimbing == true && rayFromHead.collider != null)
         {
@@ -90,8 +146,8 @@ public class Hero : Character
         else
         {
             rb.gravityScale = 5;
-        }
-   
+        }*/
+
 
         /*if ((Input.GetButton("Horizontal")  && (!isFiring)))
         {
@@ -110,13 +166,13 @@ public class Hero : Character
             Move();
             //Climb();
         }*/
-            /*else if (Input.GetButton("Vertical"))
-            {
-                speed = speedLocalReference;
-                direction = Input.GetAxis("Vertical");
-                animator.SetFloat("speed", speed);
-                Move();
-            }*/
+        /*else if (Input.GetButton("Vertical"))
+        {
+            speed = speedLocalReference;
+            direction = Input.GetAxis("Vertical");
+            animator.SetFloat("speed", speed);
+            Move();
+        }*/
 
         /*else
         {

@@ -6,7 +6,7 @@ public class Character : MonoBehaviour
 {
     [SerializeField] protected float speed;
     [SerializeField] protected float direction;
-    [SerializeField] protected float vertical;
+    [SerializeField] protected float verticalDirection;
 
     //The max life points. They can be set in the inspector 
     [SerializeField] protected int maxLifePoints;
@@ -224,9 +224,9 @@ public class Character : MonoBehaviour
         if (isClimbing == true && rayFromHead.collider != null)
         {
             Debug.Log("Let's Climb" + direction);
-            vertical = Input.GetAxisRaw("Vertical");
+            //verticalDirection = Input.GetAxisRaw("Vertical");
             rb.gravityScale = 0;
-            rb.velocity = new Vector2(rb.velocity.x, vertical * speed);
+           //b.velocity = new Vector2(rb.velocity.x, verticalDirection * speed);
         }
         else
         {
